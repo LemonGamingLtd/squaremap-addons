@@ -2,6 +2,8 @@ package xyz.jpenilla.squaremap.addon.griefprevention.hook;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.bukkit.World;
 import xyz.jpenilla.squaremap.addon.griefprevention.SquaremapGriefPrevention;
 import xyz.jpenilla.squaremap.addon.griefprevention.task.SquaremapTask;
@@ -33,7 +35,7 @@ public final class SquaremapHook {
                 .build();
             world.layerRegistry().register(GP_LAYER_KEY, provider);
             SquaremapTask task = new SquaremapTask(plugin, world, provider);
-            task.runTaskTimerAsynchronously(plugin, 0, 20L * plugin.config().updateInterval);
+            task.runTaskTimerAsynchronously(plugin.scheduler(), 1L, plugin.config().updateInterval, TimeUnit.SECONDS);
             this.tasks.put(world.identifier(), task);
         }
     }

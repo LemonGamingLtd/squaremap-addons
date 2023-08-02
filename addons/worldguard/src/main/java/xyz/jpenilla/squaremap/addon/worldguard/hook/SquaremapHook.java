@@ -2,6 +2,8 @@ package xyz.jpenilla.squaremap.addon.worldguard.hook;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import xyz.jpenilla.squaremap.addon.worldguard.SquaremapWorldGuard;
 import xyz.jpenilla.squaremap.addon.worldguard.task.SquaremapTask;
 import xyz.jpenilla.squaremap.api.Key;
@@ -24,7 +26,7 @@ public final class SquaremapHook {
                 .build();
             world.layerRegistry().register(WORLDGUARD_LAYER_KEY, provider);
             SquaremapTask task = new SquaremapTask(plugin, world, provider);
-            task.runTaskTimerAsynchronously(plugin, 0, 20L * plugin.config().updateInterval);
+            task.runTaskTimerAsynchronously(plugin.scheduler(), 1L, plugin.config().updateInterval, TimeUnit.SECONDS);
             this.provider.put(world.identifier(), task);
         });
     }

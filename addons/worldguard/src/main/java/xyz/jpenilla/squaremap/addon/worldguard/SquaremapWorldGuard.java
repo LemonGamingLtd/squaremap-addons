@@ -4,10 +4,11 @@ import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
 import org.bukkit.plugin.java.JavaPlugin;
+import xyz.jpenilla.squaremap.addon.common.AddonJavaPlugin;
 import xyz.jpenilla.squaremap.addon.worldguard.config.WGConfig;
 import xyz.jpenilla.squaremap.addon.worldguard.hook.SquaremapHook;
 
-public final class SquaremapWorldGuard extends JavaPlugin {
+public final class SquaremapWorldGuard extends AddonJavaPlugin {
     private SquaremapHook squaremapHook;
     private WGConfig config;
     private StateFlag visibleFlag;
@@ -36,6 +37,7 @@ public final class SquaremapWorldGuard extends JavaPlugin {
         if (this.squaremapHook != null) {
             this.squaremapHook.disable();
         }
+        scheduler().getImpl().cancelAllTasks();
     }
 
     public WGConfig config() {

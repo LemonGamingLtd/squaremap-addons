@@ -1,10 +1,10 @@
 package xyz.jpenilla.squaremap.addon.claimchunk;
 
-import org.bukkit.plugin.java.JavaPlugin;
 import xyz.jpenilla.squaremap.addon.claimchunk.config.ClaimChunkConfig;
 import xyz.jpenilla.squaremap.addon.claimchunk.hook.SquaremapHook;
+import xyz.jpenilla.squaremap.addon.common.AddonJavaPlugin;
 
-public final class SquaremapClaimChunk extends JavaPlugin {
+public final class SquaremapClaimChunk extends AddonJavaPlugin {
     private SquaremapHook squaremapHook;
     private ClaimChunkConfig config;
 
@@ -21,6 +21,7 @@ public final class SquaremapClaimChunk extends JavaPlugin {
         if (this.squaremapHook != null) {
             this.squaremapHook.disable();
         }
+        scheduler().getImpl().cancelAllTasks();
     }
 
     public ClaimChunkConfig config() {

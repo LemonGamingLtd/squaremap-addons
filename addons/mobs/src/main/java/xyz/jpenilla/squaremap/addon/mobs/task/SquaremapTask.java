@@ -6,7 +6,7 @@ import org.bukkit.HeightMap;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mob;
-import org.bukkit.scheduler.BukkitRunnable;
+import xyz.jpenilla.squaremap.addon.common.scheduler.WrappedRunnable;
 import xyz.jpenilla.squaremap.addon.mobs.config.MobsWorldConfig;
 import xyz.jpenilla.squaremap.addon.mobs.data.Icons;
 import xyz.jpenilla.squaremap.api.BukkitAdapter;
@@ -17,7 +17,7 @@ import xyz.jpenilla.squaremap.api.marker.Icon;
 import xyz.jpenilla.squaremap.api.marker.Marker;
 import xyz.jpenilla.squaremap.api.marker.MarkerOptions;
 
-public final class SquaremapTask extends BukkitRunnable {
+public final class SquaremapTask extends WrappedRunnable {
     private final MapWorld world;
     private final SimpleLayerProvider provider;
     private final MobsWorldConfig worldConfig;

@@ -1,10 +1,10 @@
 package xyz.jpenilla.squaremap.addon.griefprevention;
 
-import org.bukkit.plugin.java.JavaPlugin;
+import xyz.jpenilla.squaremap.addon.common.AddonJavaPlugin;
 import xyz.jpenilla.squaremap.addon.griefprevention.config.GPConfig;
 import xyz.jpenilla.squaremap.addon.griefprevention.hook.SquaremapHook;
 
-public final class SquaremapGriefPrevention extends JavaPlugin {
+public final class SquaremapGriefPrevention extends AddonJavaPlugin {
     private SquaremapHook squaremapHook;
     private GPConfig config;
 
@@ -25,5 +25,6 @@ public final class SquaremapGriefPrevention extends JavaPlugin {
         if (this.squaremapHook != null) {
             this.squaremapHook.disable();
         }
+        scheduler().getImpl().cancelAllTasks();
     }
 }

@@ -4,9 +4,9 @@ import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.Base64;
+import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -14,13 +14,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import xyz.jpenilla.squaremap.addon.common.scheduler.WrappedRunnable;
+import xyz.jpenilla.squaremap.addon.common.AddonJavaPlugin;
 import xyz.jpenilla.squaremap.api.SquaremapProvider;
 
-public final class SquaremapSkins extends JavaPlugin {
+public final class SquaremapSkins extends AddonJavaPlugin {
     private static SquaremapSkins instance;
     private static File skinsDir;
 
@@ -43,23 +43,23 @@ public final class SquaremapSkins extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new Listener() {
             @EventHandler(priority = EventPriority.MONITOR)
             public void onPlayerJoin(PlayerJoinEvent event) {
-                new FetchSkinURL(event.getPlayer()).runTaskLater(instance, 5);
+                new FetchSkinURL(event.getPlayer()).runTaskLater(instance.scheduler(), 250L, TimeUnit.MILLISECONDS);
             }
         }, this);
 
         int interval = getConfig().getInt("update-interval", 60);
-        new UpdateTask().runTaskTimer(instance, interval, interval);
+        new UpdateTask().runTaskTimer(instance.scheduler(), interval / 20L, interval / 20L, TimeUnit.SECONDS);
     }
 
-    private static class UpdateTask extends BukkitRunnable {
+    private static class UpdateTask extends WrappedRunnable {
         @Override
         public void run() {
             Bukkit.getOnlinePlayers().forEach(player ->
-                new FetchSkinURL(player).runTask(instance));
+                new FetchSkinURL(player).runTask(instance.scheduler()));
         }
     }
 
-    private static final class FetchSkinURL extends BukkitRunnable {
+    private static final class FetchSkinURL extends WrappedRunnable {
         private final Player player;
 
         private FetchSkinURL(Player player) {
@@ -76,11 +76,11 @@ public final class SquaremapSkins extends JavaPlugin {
                 return;
             }
             String name = player.getName();
-            new SaveSkin(name, url).runTaskAsynchronously(instance);
+            new SaveSkin(name, url).runTaskAsynchronously(instance.scheduler());
         }
     }
 
-    private static final class SaveSkin extends BukkitRunnable {
+    private static final class SaveSkin extends WrappedRunnable {
         private final String name;
         private final String url;
 

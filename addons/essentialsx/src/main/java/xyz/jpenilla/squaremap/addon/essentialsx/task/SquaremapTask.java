@@ -5,7 +5,7 @@ import com.earth2me.essentials.commands.WarpNotFoundException;
 import net.ess3.api.InvalidWorldException;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.scheduler.BukkitRunnable;
+import xyz.jpenilla.squaremap.addon.common.scheduler.WrappedRunnable;
 import xyz.jpenilla.squaremap.addon.essentialsx.config.EssXWorldConfig;
 import xyz.jpenilla.squaremap.addon.essentialsx.hook.EssentialsHook;
 import xyz.jpenilla.squaremap.addon.essentialsx.hook.SquaremapHook;
@@ -18,7 +18,7 @@ import xyz.jpenilla.squaremap.api.marker.Icon;
 import xyz.jpenilla.squaremap.api.marker.Marker;
 import xyz.jpenilla.squaremap.api.marker.MarkerOptions;
 
-public final class SquaremapTask extends BukkitRunnable {
+public final class SquaremapTask extends WrappedRunnable {
     private final MapWorld world;
     private final SimpleLayerProvider provider;
     private final EssXWorldConfig worldConfig;

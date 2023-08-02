@@ -2,6 +2,9 @@ package xyz.jpenilla.squaremap.addon.claimchunk.hook;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import com.tcoded.folialib.wrapper.WrappedTask;
 import xyz.jpenilla.squaremap.addon.claimchunk.SquaremapClaimChunk;
 import xyz.jpenilla.squaremap.addon.claimchunk.task.SquaremapTask;
 import xyz.jpenilla.squaremap.api.Key;
@@ -27,7 +30,7 @@ public final class SquaremapHook {
             world.layerRegistry().register(CLAIM_CHUNK_LAYER_KEY, provider);
 
             final SquaremapTask task = new SquaremapTask(plugin, world, provider);
-            task.runTaskTimerAsynchronously(plugin, 20L, 20L * plugin.config().updateInterval);
+            task.runTaskTimerAsynchronously(plugin.scheduler(), 1L, plugin.config().updateInterval, TimeUnit.SECONDS);
 
             this.tasks.put(world.identifier(), task);
         }

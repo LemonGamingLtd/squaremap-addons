@@ -2,6 +2,8 @@ package xyz.jpenilla.squaremap.addon.mobs.hook;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import xyz.jpenilla.squaremap.addon.mobs.SquaremapMobs;
 import xyz.jpenilla.squaremap.addon.mobs.config.MobsWorldConfig;
 import xyz.jpenilla.squaremap.addon.mobs.task.SquaremapTask;
@@ -34,7 +36,7 @@ public final class SquaremapHook {
                 .build();
             mapWorld.layerRegistry().register(MOBS_LAYER_KEY, provider);
             final SquaremapTask task = new SquaremapTask(mapWorld, worldConfig, provider);
-            task.runTaskTimer(this.plugin, 0, 20L * this.plugin.config().updateInterval);
+            task.runTaskTimer(this.plugin.scheduler(), 1L, this.plugin.config().updateInterval, TimeUnit.SECONDS);
             this.tasks.put(mapWorld.identifier(), task);
         }
     }

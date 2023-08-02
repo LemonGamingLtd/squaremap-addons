@@ -3,7 +3,7 @@ package xyz.jpenilla.squaremap.addon.deathspot.task;
 import java.util.UUID;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.scheduler.BukkitRunnable;
+import xyz.jpenilla.squaremap.addon.common.scheduler.WrappedRunnable;
 import xyz.jpenilla.squaremap.addon.deathspot.DeathSpots;
 import xyz.jpenilla.squaremap.addon.deathspot.config.DeathSpotWorldConfig;
 import xyz.jpenilla.squaremap.addon.deathspot.hook.SquaremapHook;
@@ -15,7 +15,7 @@ import xyz.jpenilla.squaremap.api.marker.Icon;
 import xyz.jpenilla.squaremap.api.marker.Marker;
 import xyz.jpenilla.squaremap.api.marker.MarkerOptions;
 
-public final class SquaremapTask extends BukkitRunnable {
+public final class SquaremapTask extends WrappedRunnable {
     private final DeathSpots plugin;
     private final SimpleLayerProvider provider;
     private final DeathSpotWorldConfig worldConfig;

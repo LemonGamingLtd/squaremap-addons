@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import xyz.jpenilla.squaremap.addon.essentialsx.SquaremapEssentials;
 import xyz.jpenilla.squaremap.addon.essentialsx.config.EssXWorldConfig;
@@ -47,7 +48,7 @@ public final class SquaremapHook {
                 .build();
             mapWorld.layerRegistry().register(Key.of("essentials_warps"), provider);
             SquaremapTask task = new SquaremapTask(mapWorld, worldConfig, provider);
-            task.runTaskTimerAsynchronously(this.plugin, 0, 20L * this.plugin.config().updateInterval);
+            task.runTaskTimerAsynchronously(this.plugin.scheduler(), 1L, this.plugin.config().updateInterval, TimeUnit.SECONDS);
             this.tasks.put(mapWorld.identifier(), task);
         }
     }
