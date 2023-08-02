@@ -5,8 +5,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import javax.imageio.ImageIO;
+
+import com.tcoded.folialib.wrapper.WrappedTask;
 import xyz.jpenilla.squaremap.addon.deathspot.DeathSpots;
 import xyz.jpenilla.squaremap.addon.deathspot.config.DeathSpotWorldConfig;
 import xyz.jpenilla.squaremap.addon.deathspot.task.SquaremapTask;
@@ -45,7 +48,7 @@ public final class SquaremapHook {
             world.layerRegistry().register(DEATH_SPOTS_LAYER_KEY, provider);
 
             final SquaremapTask task = new SquaremapTask(plugin, world, provider);
-            task.runTaskTimerAsynchronously(plugin, 0, 20L * worldConfig.updateInterval);
+            task.runTaskTimerAsynchronously(plugin.scheduler(), 1L, worldConfig.updateInterval, TimeUnit.SECONDS);
 
             this.tasks.put(world.identifier(), task);
         }

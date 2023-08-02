@@ -1,17 +1,18 @@
 package xyz.jpenilla.squaremap.addon.deathspot;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import org.bukkit.Location;
-import org.bukkit.plugin.java.JavaPlugin;
+import xyz.jpenilla.squaremap.addon.common.AddonJavaPlugin;
 import xyz.jpenilla.squaremap.addon.deathspot.config.DeathSpotConfig;
 import xyz.jpenilla.squaremap.addon.deathspot.hook.SquaremapHook;
 import xyz.jpenilla.squaremap.addon.deathspot.listener.PlayerListener;
 import xyz.jpenilla.squaremap.api.Pair;
 
-public final class DeathSpots extends JavaPlugin {
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public final class DeathSpots extends AddonJavaPlugin {
     private static DeathSpots instance;
     private DeathSpotConfig config;
     private final Map<UUID, Pair<String, Location>> deathSpots = new HashMap<>();
@@ -41,6 +42,7 @@ public final class DeathSpots extends JavaPlugin {
             this.squaremapHook.disable();
         }
         this.deathSpots.clear();
+        scheduler().getImpl().cancelAllTasks();
     }
 
     public static DeathSpots getInstance() {

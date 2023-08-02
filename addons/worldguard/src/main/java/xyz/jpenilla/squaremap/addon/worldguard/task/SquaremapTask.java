@@ -10,7 +10,8 @@ import com.sk89q.worldguard.util.profile.cache.ProfileCache;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.bukkit.scheduler.BukkitRunnable;
+
+import xyz.jpenilla.squaremap.addon.common.scheduler.WrappedRunnable;
 import xyz.jpenilla.squaremap.addon.worldguard.SquaremapWorldGuard;
 import xyz.jpenilla.squaremap.addon.worldguard.hook.WGHook;
 import xyz.jpenilla.squaremap.api.BukkitAdapter;
@@ -21,7 +22,7 @@ import xyz.jpenilla.squaremap.api.SimpleLayerProvider;
 import xyz.jpenilla.squaremap.api.marker.Marker;
 import xyz.jpenilla.squaremap.api.marker.MarkerOptions;
 
-public final class SquaremapTask extends BukkitRunnable {
+public final class SquaremapTask extends WrappedRunnable {
     private final MapWorld world;
     private final SimpleLayerProvider provider;
     private final SquaremapWorldGuard plugin;

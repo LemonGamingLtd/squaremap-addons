@@ -1,11 +1,11 @@
 package xyz.jpenilla.squaremap.addon.mobs;
 
-import org.bukkit.plugin.java.JavaPlugin;
+import xyz.jpenilla.squaremap.addon.common.AddonJavaPlugin;
 import xyz.jpenilla.squaremap.addon.mobs.config.MobsConfig;
 import xyz.jpenilla.squaremap.addon.mobs.data.Icons;
 import xyz.jpenilla.squaremap.addon.mobs.hook.SquaremapHook;
 
-public final class SquaremapMobs extends JavaPlugin {
+public final class SquaremapMobs extends AddonJavaPlugin {
     private static SquaremapMobs instance;
     private SquaremapHook squaremapHook;
     private MobsConfig config;
@@ -31,6 +31,7 @@ public final class SquaremapMobs extends JavaPlugin {
             this.squaremapHook.disable();
         }
         this.squaremapHook = null;
+        scheduler().getImpl().cancelAllTasks();
     }
 
     public static SquaremapMobs getInstance() {

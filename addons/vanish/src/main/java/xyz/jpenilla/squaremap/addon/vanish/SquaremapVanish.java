@@ -6,10 +6,11 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import xyz.jpenilla.squaremap.addon.common.AddonJavaPlugin;
 import xyz.jpenilla.squaremap.api.Squaremap;
 import xyz.jpenilla.squaremap.api.SquaremapProvider;
 
-public final class SquaremapVanish extends JavaPlugin implements Listener {
+public final class SquaremapVanish extends AddonJavaPlugin implements Listener {
     private Squaremap squaremap;
 
     private VanishAdapter vanishAdapter = null;

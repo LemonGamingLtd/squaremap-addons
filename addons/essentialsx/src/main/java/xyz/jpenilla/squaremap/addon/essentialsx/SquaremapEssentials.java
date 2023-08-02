@@ -1,12 +1,13 @@
 package xyz.jpenilla.squaremap.addon.essentialsx;
 
 import java.io.File;
-import org.bukkit.plugin.java.JavaPlugin;
+
+import xyz.jpenilla.squaremap.addon.common.AddonJavaPlugin;
 import xyz.jpenilla.squaremap.addon.essentialsx.config.EssXConfig;
 import xyz.jpenilla.squaremap.addon.essentialsx.hook.SquaremapHook;
 import xyz.jpenilla.squaremap.addon.essentialsx.listener.EssentialsListener;
 
-public final class SquaremapEssentials extends JavaPlugin {
+public final class SquaremapEssentials extends AddonJavaPlugin {
     private SquaremapHook squaremapHook;
     private EssXConfig config;
 
@@ -35,5 +36,6 @@ public final class SquaremapEssentials extends JavaPlugin {
             this.squaremapHook.disable();
         }
         this.squaremapHook = null;
+        scheduler().getImpl().cancelAllTasks();
     }
 }

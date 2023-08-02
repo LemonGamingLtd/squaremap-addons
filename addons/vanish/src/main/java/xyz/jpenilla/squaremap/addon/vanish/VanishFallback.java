@@ -6,11 +6,12 @@ import xyz.jpenilla.squaremap.api.Squaremap;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class VanishFallback implements VanishAdapter {
 
     public VanishFallback(final SquaremapVanish plugin, final Squaremap squaremap) {
-        plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+        plugin.scheduler().getImpl().runTimer(() -> {
             for (final Player player : plugin.getServer().getOnlinePlayers()) {
                 final boolean isVanished = isVanished(player);
                 final UUID playerId = player.getUniqueId();
@@ -18,7 +19,7 @@ public class VanishFallback implements VanishAdapter {
                     squaremap.playerManager().hidden(playerId, isVanished);
                 }
             }
-        }, 0, 20);
+        }, 1L, 1L, TimeUnit.SECONDS);
     }
 
     @Override
