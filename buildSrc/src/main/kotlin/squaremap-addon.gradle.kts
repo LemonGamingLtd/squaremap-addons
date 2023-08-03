@@ -45,4 +45,5 @@ bukkit {
     apiVersion = "1.18"
     addDepend("squaremap")
     addAuthor("jmp")
+    foliaSupported = true
 }
