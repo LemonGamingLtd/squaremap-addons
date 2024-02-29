@@ -43,8 +43,8 @@ public final class SquaremapHook {
                 .defaultHidden(cfg.controlHide)
                 .build();
             world.layerRegistry().register(WORLDGUARD_LAYER_KEY, provider);
-            SquaremapTask task = new SquaremapTask(plugin, world, provider);
-            task.runTaskTimerAsynchronously(this.plugin.scheduler(), 1L, plugin.config().updateInterval, TimeUnit.SECONDS);
+            SquaremapTask task = new SquaremapTask(plugin, world.identifier(), provider);
+            task.runTaskTimerAsynchronously(this.plugin.scheduler(), 1L, plugin.config().worldConfig(world.identifier()).updateInterval, TimeUnit.SECONDS);
             return task;
         });
     }
