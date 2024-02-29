@@ -76,7 +76,7 @@ public final class SquaremapTask extends WrappedRunnable {
 
         rect.markerOptions(options);
 
-        String markerid = "griefprevention_region_" + claim.getCoordString();
+        String markerid = "factions_claim_%s_%s".formatted(chunkX, chunkX);
         this.provider.addMarker(Key.of(markerid), rect);
     }
 
