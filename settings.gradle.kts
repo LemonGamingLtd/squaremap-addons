@@ -25,6 +25,7 @@ dependencyResolutionManagement {
             }
         }
         maven("https://nexuslite.gcnt.net/repos/other/")
+        maven("https://ci.ender.zone/plugin/repository/everything/")
     }
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
 }
@@ -47,6 +48,7 @@ includeAddon("griefprevention")
 includeAddon("claimchunk")
 includeAddon("banners")
 includeAddon("vanish")
+includeAddon("factionsuuid")
 
 fun includeAddon(addonName: String) {
     val name = "squaremap-$addonName"
