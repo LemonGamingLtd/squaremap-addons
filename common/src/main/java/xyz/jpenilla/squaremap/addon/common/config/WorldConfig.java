@@ -1,5 +1,7 @@
 package xyz.jpenilla.squaremap.addon.common.config;
 
+import java.awt.Color;
+import java.lang.reflect.Type;
 import java.util.List;
 
 @SuppressWarnings("unused")
@@ -47,6 +49,34 @@ public abstract class WorldConfig {
             return this.parent.getList(elementType, wrapDefaultPath(path), def);
         }
         return this.parent.getList(elementType, this.wrapPath(path), this.parent.getList(elementType, wrapDefaultPath(path), def));
+    }
+
+    protected final Color getColor(String path, Color def) {
+        if (this.virtual(this.wrapPath(path))) {
+            return this.parent.getColor(wrapDefaultPath(path), def);
+        }
+        return this.parent.getColor(this.wrapPath(path), this.parent.getColor(wrapDefaultPath(path), def));
+    }
+
+    protected final <E extends Enum<E>> E getEnum(String path, Class<E> enumClass, E def) {
+        if (this.virtual(this.wrapPath(path))) {
+            return this.parent.getEnum(wrapDefaultPath(path), enumClass, def);
+        }
+        return this.parent.getEnum(this.wrapPath(path), enumClass, this.parent.getEnum(wrapDefaultPath(path), enumClass, def));
+    }
+
+    protected final <T> T get(String path, Class<T> type, T def) {
+        if (this.virtual(this.wrapPath(path))) {
+            return this.parent.get(wrapDefaultPath(path), type, def);
+        }
+        return this.parent.get(this.wrapPath(path), type, this.parent.get(wrapDefaultPath(path), type, def));
+    }
+
+    protected final <T> T get(String path, Type type, T def) {
+        if (this.virtual(this.wrapPath(path))) {
+            return this.parent.get(wrapDefaultPath(path), type, def);
+        }
+        return this.parent.get(this.wrapPath(path), type, this.parent.get(wrapDefaultPath(path), type, def));
     }
 
     private boolean virtual(String path) {

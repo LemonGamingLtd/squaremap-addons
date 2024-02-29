@@ -2,18 +2,19 @@ package xyz.jpenilla.squaremap.addon.signs;
 
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.jpenilla.squaremap.addon.signs.config.SignsConfig;
+import xyz.jpenilla.squaremap.addon.signs.data.CustomIcons;
 import xyz.jpenilla.squaremap.addon.signs.data.Icons;
 import xyz.jpenilla.squaremap.addon.signs.data.SignManager;
-import xyz.jpenilla.squaremap.addon.signs.hook.SquaremapHook;
+import xyz.jpenilla.squaremap.addon.signs.hook.LayerProviderManager;
 import xyz.jpenilla.squaremap.addon.signs.listener.SignListener;
 import xyz.jpenilla.squaremap.addon.signs.listener.WorldListener;
-import xyz.jpenilla.squaremap.api.Key;
 
 public final class SignsPlugin extends JavaPlugin {
     private static SignsPlugin instance;
-    private SquaremapHook squaremapHook;
+    private LayerProviderManager layerProviderManager;
     private SignManager signManager;
     private SignsConfig config;
+    private CustomIcons customIcons;
 
     public SignsPlugin() {
         instance = this;
@@ -24,14 +25,12 @@ public final class SignsPlugin extends JavaPlugin {
         this.config = new SignsConfig(this);
         this.config.reload();
 
-        @SuppressWarnings("unused")
-        Key staticInit = Icons.OAK;
+        Icons.register(this);
+        this.customIcons = CustomIcons.register(this);
 
-        this.squaremapHook = new SquaremapHook();
-        this.squaremapHook.load();
-
+        this.layerProviderManager = new LayerProviderManager(this);
         this.signManager = new SignManager(this);
-        this.signManager.load();
+        this.layerProviderManager.load();
 
         this.getServer().getPluginManager().registerEvents(new SignListener(this), this);
         this.getServer().getPluginManager().registerEvents(new WorldListener(this), this);
@@ -39,30 +38,33 @@ public final class SignsPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        if (this.signManager != null) {
-            this.signManager.save();
-            this.signManager = null;
+        if (this.layerProviderManager != null) {
+            this.layerProviderManager.disable();
+            this.layerProviderManager = null;
         }
+        this.signManager = null;
 
-        if (this.squaremapHook != null) {
-            this.squaremapHook.disable();
-            this.signManager = null;
-        }
+        this.customIcons.unregister();
+        Icons.unregister();
     }
 
-    public static SignsPlugin getInstance() {
+    public static SignsPlugin instance() {
         return instance;
     }
 
-    public SquaremapHook squaremapHook() {
-        return this.squaremapHook;
+    public LayerProviderManager layerProviders() {
+        return this.layerProviderManager;
     }
 
-    public SignManager getSignManager() {
+    public SignManager signManager() {
         return this.signManager;
     }
 
     public SignsConfig config() {
         return this.config;
+    }
+
+    public CustomIcons customIcons() {
+        return this.customIcons;
     }
 }

@@ -1,8 +1,12 @@
 package xyz.jpenilla.squaremap.addon.worldguard;
 
 import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.flags.DoubleFlag;
+import com.sk89q.worldguard.protection.flags.IntegerFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
+import com.sk89q.worldguard.protection.flags.StringFlag;
 import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
+import java.util.List;
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.jpenilla.squaremap.addon.common.AddonJavaPlugin;
 import xyz.jpenilla.squaremap.addon.worldguard.config.WGConfig;
@@ -11,7 +15,13 @@ import xyz.jpenilla.squaremap.addon.worldguard.hook.SquaremapHook;
 public final class SquaremapWorldGuard extends AddonJavaPlugin {
     private SquaremapHook squaremapHook;
     private WGConfig config;
-    private StateFlag visibleFlag;
+    public StateFlag visibleFlag;
+    public StringFlag strokeColorFlag;
+    public IntegerFlag strokeWeightFlag;
+    public DoubleFlag strokeOpacityFlag;
+    public StringFlag fillColorFlag;
+    public DoubleFlag fillOpacityFlag;
+    public StringFlag clickTooltipFlag;
 
     @Override
     public void onEnable() {
@@ -19,6 +29,7 @@ public final class SquaremapWorldGuard extends AddonJavaPlugin {
         this.config.reload();
 
         this.squaremapHook = new SquaremapHook(this);
+        this.getServer().getPluginManager().registerEvents(new EventListener(this), this);
     }
 
     @Override
@@ -27,9 +38,18 @@ public final class SquaremapWorldGuard extends AddonJavaPlugin {
     }
 
     private void setupFlags() {
-        final FlagRegistry flagRegistry = WorldGuard.getInstance().getFlagRegistry();
         this.visibleFlag = new StateFlag("squaremap-visible", true);
-        flagRegistry.register(this.visibleFlag);
+        this.strokeColorFlag = new StringFlag("squaremap-stroke-color", (String) null);
+        this.strokeWeightFlag = new IntegerFlag("squaremap-stroke-weight");
+        this.strokeOpacityFlag = new DoubleFlag("squaremap-stroke-opacity");
+        this.fillColorFlag = new StringFlag("squaremap-fill-color", (String) null);
+        this.fillOpacityFlag = new DoubleFlag("squaremap-fill-opacity");
+        this.clickTooltipFlag = new StringFlag("squaremap-click-tooltip", (String) null);
+
+        final FlagRegistry flagRegistry = WorldGuard.getInstance().getFlagRegistry();
+        flagRegistry.registerAll(List.of(
+            this.visibleFlag, this.strokeColorFlag, this.strokeWeightFlag, this.strokeOpacityFlag, this.fillColorFlag, this.fillOpacityFlag, this.clickTooltipFlag
+        ));
     }
 
     @Override
@@ -44,7 +64,7 @@ public final class SquaremapWorldGuard extends AddonJavaPlugin {
         return this.config;
     }
 
-    public StateFlag visibleFlag() {
-        return this.visibleFlag;
+    public SquaremapHook squaremapHook() {
+        return this.squaremapHook;
     }
 }

@@ -19,8 +19,10 @@ import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 import org.spongepowered.configurate.yaml.NodeStyle;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
+import xyz.jpenilla.squaremap.addon.common.Util;
 import xyz.jpenilla.squaremap.api.BukkitAdapter;
 import xyz.jpenilla.squaremap.api.SquaremapProvider;
 import xyz.jpenilla.squaremap.api.WorldIdentifier;
@@ -37,7 +39,6 @@ public abstract class Config<C extends Config<C, W>, W extends WorldConfig> {
     private final @Nullable Class<W> worldConfigClass;
     private final @Nullable Map<WorldIdentifier, W> worldConfigs;
     ConfigurationNode config;
-    //static int VERSION;
 
     protected Config(final Class<C> configClass, final Plugin plugin) {
         this(configClass, null, plugin);
@@ -59,16 +60,35 @@ public abstract class Config<C extends Config<C, W>, W extends WorldConfig> {
             .build();
     }
 
+    protected void addVersions(final ConfigurationTransformation.VersionedBuilder versionedBuilder) {
+    }
+
+    private ConfigUpgrader createUpgrader() {
+        return new ConfigUpgrader(builder -> {
+            builder.versionKey("config-version");
+            builder.addVersion(0, ConfigurationTransformation.empty());
+            this.addVersions(builder);
+        });
+    }
+
     public final void reload() {
         try {
             this.config = this.loader.load();
         } catch (IOException ex) {
             throw new RuntimeException("Could not load config.yml, exception occurred (are there syntax errors?)", ex);
         }
-        //this.config.options().copyDefaults(true);
 
-        //VERSION = getInt("config-version", 1);
-        //set("config-version", 1);
+        final ConfigUpgrader upgrader = this.createUpgrader();
+        if (!this.config.empty()) {
+            upgrader.upgrade(this.config);
+        } else {
+            final ConfigurationNode versionNode = this.config.node(upgrader.transform().versionKey());
+            try {
+                versionNode.set(upgrader.transform().latestVersion());
+            } catch (final SerializationException ex) {
+                throw Util.rethrow(ex);
+            }
+        }
 
         this.readConfig(this.configClass, this);
 
@@ -162,6 +182,31 @@ public abstract class Config<C extends Config<C, W>, W extends WorldConfig> {
 
     private ConfigurationNode node(String path) {
         return this.config.node(splitPath(path));
+    }
+
+    protected final <T> T get(String path, Class<T> type, T def) {
+        return this.get(path, (Type) type, def);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected final <T> T get(String path, Type type, T def) {
+        final ConfigurationNode node = this.node(path);
+        try {
+            if (node.virtual()) {
+                node.set(type, def);
+            }
+            return (T) node.get(type, def);
+        } catch (final SerializationException ex) {
+            throw rethrow(ex);
+        }
+    }
+
+    protected final <E extends Enum<E>> E getEnum(String path, Class<E> enumClass, E def) {
+        try {
+            return this.node(path).get(enumClass, def);
+        } catch (final SerializationException e) {
+            throw rethrow(e);
+        }
     }
 
     protected final String getString(String path, String def) {

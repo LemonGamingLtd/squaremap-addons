@@ -1,38 +1,53 @@
 package xyz.jpenilla.squaremap.addon.worldguard.config;
 
-import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.plugin.Plugin;
-import xyz.jpenilla.squaremap.addon.common.config.WorldConfig;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.NodePath;
+import org.spongepowered.configurate.transformation.ConfigurationTransformation;
+import org.spongepowered.configurate.transformation.TransformAction;
+import xyz.jpenilla.squaremap.addon.common.config.Config;
+import xyz.jpenilla.squaremap.addon.common.config.ListMode;
 
-public final class WGConfig extends xyz.jpenilla.squaremap.addon.common.config.Config<WGConfig, WorldConfig> {
-    public String controlLabel = "WorldGuard";
-    public boolean controlShow = true;
-    public boolean controlHide = false;
-    public int updateInterval = 300;
-    public Color strokeColor = Color.GREEN;
-    public int strokeWeight = 1;
-    public double strokeOpacity = 1.0D;
-    public Color fillColor = Color.GREEN;
-    public double fillOpacity = 0.2D;
-    public String claimTooltip = "<span style=\"font-size:120%;\">{regionname}</span><br />" +
-        "Owner <span style=\"font-weight:bold;\">{playerowners}</span><br />" +
-        "Flags<br /><span style=\"font-weight:bold;\">{flags}</span>";
-
-    @SuppressWarnings("unused")
-    private void init() {
-        this.controlLabel = this.getString("settings.control.label", this.controlLabel);
-        this.controlShow = this.getBoolean("settings.control.show", this.controlShow);
-        this.controlHide = this.getBoolean("settings.control.hide-by-default", this.controlHide);
-        this.updateInterval = this.getInt("settings.update-interval", this.updateInterval);
-        this.strokeColor = this.getColor("settings.style.stroke.color", this.strokeColor);
-        this.strokeWeight = this.getInt("settings.style.stroke.weight", this.strokeWeight);
-        this.strokeOpacity = this.getDouble("settings.style.stroke.opacity", this.strokeOpacity);
-        this.fillColor = this.getColor("settings.style.fill.color", this.fillColor);
-        this.fillOpacity = this.getDouble("settings.style.fill.opacity", this.fillOpacity);
-        this.claimTooltip = this.getString("settings.region.tooltip", this.claimTooltip);
+public final class WGConfig extends Config<WGConfig, WGWorldConfig> {
+    public WGConfig(Plugin plugin) {
+        super(WGConfig.class, WGWorldConfig.class, plugin);
     }
 
-    public WGConfig(Plugin plugin) {
-        super(WGConfig.class, plugin);
+    @Override
+    protected void addVersions(final ConfigurationTransformation.VersionedBuilder versionedBuilder) {
+        final ConfigurationTransformation zeroToOne = ConfigurationTransformation.builder()
+            .addAction(NodePath.path("settings", "style"), (path, node) -> new Object[]{"settings", "default-style"})
+            .addAction(NodePath.path("settings", "region", "tooltip"), (path, node) -> new Object[]{"settings", "default-style", "click-tooltip"})
+            .addAction(NodePath.path("settings", "region"), TransformAction.remove())
+            .build();
+
+        final ConfigurationTransformation oneToTwo = ConfigurationTransformation.builder()
+            .addAction(NodePath.path("settings"), (path, node) -> new Object[]{"world-settings", "default"})
+            .build();
+
+        final ConfigurationTransformation twoToThree = ConfigurationTransformation.builder()
+            .addAction(NodePath.path("world-settings", "default", "flags"), (path, node) -> {
+                if (node.node("list-mode").get(ListMode.class, ListMode.BLACKLIST) == ListMode.BLACKLIST) {
+                    final ConfigurationNode listNode = node.node("list");
+                    final List<String> list = new ArrayList<>(listNode.getList(String.class, List.of()));
+                    list.addAll(List.of(
+                        "squaremap-stroke-color",
+                        "squaremap-stroke-weight",
+                        "squaremap-stroke-opacity",
+                        "squaremap-fill-color",
+                        "squaremap-fill-opacity",
+                        "squaremap-click-tooltip"
+                    ));
+                    listNode.setList(String.class, list);
+                }
+                return null;
+            })
+            .build();
+
+        versionedBuilder.addVersion(1, zeroToOne)
+            .addVersion(2, oneToTwo)
+            .addVersion(3, twoToThree);
     }
 }
