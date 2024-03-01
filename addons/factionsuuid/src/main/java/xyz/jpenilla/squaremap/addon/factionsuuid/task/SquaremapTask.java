@@ -3,6 +3,7 @@ package xyz.jpenilla.squaremap.addon.factionsuuid.task;
 import com.massivecraft.factions.FLocation;
 import com.massivecraft.factions.FPlayer;
 import com.massivecraft.factions.Faction;
+import com.massivecraft.factions.perms.Role;
 import org.bukkit.World;
 import xyz.jpenilla.squaremap.addon.common.scheduler.WrappedRunnable;
 import xyz.jpenilla.squaremap.addon.factionsuuid.SquaremapFactions;
@@ -69,7 +70,7 @@ public final class SquaremapTask extends WrappedRunnable {
                 this.plugin.config().claimTooltip
                     .replace("{world}", worldName)
                     .replace("{id}", faction.getId())
-                    .replace("{owners}", faction.getOwnerListString(claim))
+                    .replace("{owners}", faction.getFPlayersWhereRole(Role.ADMIN).stream().map(FPlayer::getName).collect(Collectors.joining(", .")))
                     .replace("{members}", faction.getFPlayers().stream().map(FPlayer::getName).collect(Collectors.joining(", ")))
                     .replace("{created}", Date.from(Instant.ofEpochMilli(faction.getFoundedDate())).toString())
             );
