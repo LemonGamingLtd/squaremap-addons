@@ -70,7 +70,6 @@ public final class SquaremapTask extends WrappedRunnable {
                 this.plugin.config().claimTooltip
                     .replace("{world}", worldName)
                     .replace("{id}", faction.getId())
-                    .replace("{owners}", faction.getFPlayersWhereRole(Role.ADMIN).stream().map(FPlayer::getName).collect(Collectors.joining(", .")))
                     .replace("{members}", faction.getFPlayers().stream().map(FPlayer::getName).collect(Collectors.joining(", ")))
                     .replace("{created}", Date.from(Instant.ofEpochMilli(faction.getFoundedDate())).toString())
             );
