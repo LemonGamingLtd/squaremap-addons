@@ -56,7 +56,10 @@ public final class SquaremapTask extends WrappedRunnable {
             final long chunkX = claim.getX();
             final long chunkZ = claim.getZ();
 
-            final Point point = Point.of(chunkX, chunkZ);
+            final long x = (chunkX << 4);
+            final long z = (chunkZ << 4);
+
+            final Point point = Point.of(x, z);
             points.add(point);
         }
 
