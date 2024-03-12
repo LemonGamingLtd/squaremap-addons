@@ -3,7 +3,6 @@ package xyz.jpenilla.squaremap.addon.factionsuuid.task;
 import com.massivecraft.factions.FLocation;
 import com.massivecraft.factions.FPlayer;
 import com.massivecraft.factions.Faction;
-import com.massivecraft.factions.perms.Role;
 import org.bukkit.World;
 import xyz.jpenilla.squaremap.addon.common.scheduler.WrappedRunnable;
 import xyz.jpenilla.squaremap.addon.factionsuuid.SquaremapFactions;
@@ -15,10 +14,13 @@ import xyz.jpenilla.squaremap.api.Point;
 import xyz.jpenilla.squaremap.api.SimpleLayerProvider;
 import xyz.jpenilla.squaremap.api.marker.Marker;
 import xyz.jpenilla.squaremap.api.marker.MarkerOptions;
-import xyz.jpenilla.squaremap.api.marker.Rectangle;
+import xyz.jpenilla.squaremap.api.marker.Polygon;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public final class SquaremapTask extends WrappedRunnable {
@@ -44,20 +46,21 @@ public final class SquaremapTask extends WrappedRunnable {
 
     void updateClaims() {
         this.provider.clearMarkers(); // TODO track markers instead of clearing them
-        FactionsHook.getClaims().forEach(this::handleClaim);
+        FactionsHook.getClaims().asMap().forEach(this::handleClaim);
     }
 
-    private void handleClaim(Faction faction, FLocation claim) {
-        final long chunkX = claim.getX();
-        final long chunkZ = claim.getZ();
+    private void handleClaim(Faction faction, Collection<FLocation> claims) {
+        final List<Point> points = new ArrayList<>(claims.size());
 
-        final long minX = (chunkX << 4);
-        final long maxX = (chunkX << 4) | 15;
+        for (final FLocation claim : claims) {
+            final long chunkX = claim.getX();
+            final long chunkZ = claim.getZ();
 
-        final long minZ = (chunkZ << 4);
-        final long maxZ = (chunkZ << 4) | 15;
+            final Point point = Point.of(chunkX, chunkZ);
+            points.add(point);
+        }
 
-        Rectangle rect = Marker.rectangle(Point.of(minX, minZ), Point.of(maxX + 1, maxZ + 1));
+        final Polygon claimsMarker = Marker.polygon(points);
 
         String worldName = bukkitWorld.getName();
         MarkerOptions.Builder options = MarkerOptions.builder()
@@ -76,10 +79,10 @@ public final class SquaremapTask extends WrappedRunnable {
                     .replace("{created}", Date.from(Instant.ofEpochMilli(faction.getFoundedDate())).toString())
             );
 
-        rect.markerOptions(options);
+        claimsMarker.markerOptions(options);
 
-        String markerid = "factions_claim_%s_%s".formatted(chunkX, chunkX);
-        this.provider.addMarker(Key.of(markerid), rect);
+        String markerid = "factions_claim_%s".formatted(faction.getId());
+        this.provider.addMarker(Key.of(markerid), claimsMarker);
     }
 
     public void disable() {
