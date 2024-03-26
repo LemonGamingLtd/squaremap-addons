@@ -13,13 +13,13 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public final class SquaremapHook {
-    private static final Key FACTIONS_LAYER_KEY = Key.of("griefprevention");
+    private static final Key FACTIONS_LAYER_KEY = Key.of("factions");
 
     private final Map<WorldIdentifier, SquaremapTask> tasks = new HashMap<>();
 
     public SquaremapHook(SquaremapFactions plugin) {
         for (final MapWorld world : SquaremapProvider.get().mapWorlds()) {
-            SimpleLayerProvider provider = SimpleLayerProvider
+            final SimpleLayerProvider provider = SimpleLayerProvider
                 .builder(plugin.config().controlLabel)
                 .showControls(plugin.config().controlShow)
                 .defaultHidden(plugin.config().controlHide)
@@ -27,8 +27,10 @@ public final class SquaremapHook {
                 .layerPriority(plugin.config().layerPriority)
                 .build();
             world.layerRegistry().register(FACTIONS_LAYER_KEY, provider);
-            SquaremapTask task = new SquaremapTask(plugin, world, provider);
+
+            final SquaremapTask task = new SquaremapTask(plugin, world, provider);
             task.runTaskTimerAsynchronously(plugin.scheduler(), 1L, plugin.config().updateInterval, TimeUnit.SECONDS);
+
             this.tasks.put(world.identifier(), task);
         }
     }

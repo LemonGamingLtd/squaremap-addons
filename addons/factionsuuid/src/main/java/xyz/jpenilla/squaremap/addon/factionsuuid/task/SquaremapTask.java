@@ -14,13 +14,11 @@ import xyz.jpenilla.squaremap.api.Point;
 import xyz.jpenilla.squaremap.api.SimpleLayerProvider;
 import xyz.jpenilla.squaremap.api.marker.Marker;
 import xyz.jpenilla.squaremap.api.marker.MarkerOptions;
-import xyz.jpenilla.squaremap.api.marker.Polygon;
+import xyz.jpenilla.squaremap.api.marker.Rectangle;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public final class SquaremapTask extends WrappedRunnable {
@@ -40,6 +38,7 @@ public final class SquaremapTask extends WrappedRunnable {
     public void run() {
         if (this.stop) {
             this.cancel();
+            return;
         }
         this.updateClaims();
     }
@@ -50,23 +49,8 @@ public final class SquaremapTask extends WrappedRunnable {
     }
 
     private void handleClaim(Faction faction, Collection<FLocation> claims) {
-        final List<Point> points = new ArrayList<>(claims.size());
-
-        for (final FLocation claim : claims) {
-            final long chunkX = claim.getX();
-            final long chunkZ = claim.getZ();
-
-            final long x = (chunkX << 4);
-            final long z = (chunkZ << 4);
-
-            final Point point = Point.of(x, z);
-            points.add(point);
-        }
-
-        final Polygon claimsMarker = Marker.polygon(points);
-
-        String worldName = bukkitWorld.getName();
-        MarkerOptions.Builder options = MarkerOptions.builder()
+        final String worldName = bukkitWorld.getName();
+        final MarkerOptions.Builder options = MarkerOptions.builder()
             .strokeColor(this.plugin.config().strokeColor)
             .strokeWeight(this.plugin.config().strokeWeight)
             .strokeOpacity(this.plugin.config().strokeOpacity)
@@ -82,10 +66,22 @@ public final class SquaremapTask extends WrappedRunnable {
                     .replace("{created}", Date.from(Instant.ofEpochMilli(faction.getFoundedDate())).toString())
             );
 
-        claimsMarker.markerOptions(options);
+        for (final FLocation claim : claims) {
+            final long chunkX = claim.getX();
+            final long chunkZ = claim.getZ();
 
-        String markerid = "factions_claim_%s".formatted(faction.getId());
-        this.provider.addMarker(Key.of(markerid), claimsMarker);
+            final long minX = (chunkX << 4);
+            final long maxX = (chunkX << 4) | 15;
+
+            final long minZ = (chunkZ << 4);
+            final long maxZ = (chunkZ << 4) | 15;
+
+            final Rectangle rectangle = Marker.rectangle(Point.of(minX, minZ), Point.of(maxX + 1, maxZ + 1));
+            rectangle.markerOptions(options);
+
+            final String markerId = "factions_claim_%s_%d_%d".formatted(faction.getId(), chunkX, chunkZ);
+            this.provider.addMarker(Key.of(markerId), rectangle);
+        }
     }
 
     public void disable() {
