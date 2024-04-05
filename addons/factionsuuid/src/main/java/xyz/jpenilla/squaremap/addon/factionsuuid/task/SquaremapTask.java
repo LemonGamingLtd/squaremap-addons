@@ -50,11 +50,12 @@ public final class SquaremapTask extends WrappedRunnable {
 
     private void handleClaim(Faction faction, Collection<FLocation> claims) {
         final String worldName = bukkitWorld.getName();
+
         final MarkerOptions.Builder options = MarkerOptions.builder()
-            .strokeColor(this.plugin.config().strokeColor)
+            .strokeColor(faction.isWarZone() ? this.plugin.config().warzoneStrokeColor : this.plugin.config().strokeColor)
             .strokeWeight(this.plugin.config().strokeWeight)
             .strokeOpacity(this.plugin.config().strokeOpacity)
-            .fillColor(this.plugin.config().fillColor)
+            .fillColor(faction.isWarZone() ? this.plugin.config().warzoneFillColor : this.plugin.config().fillColor)
             .fillOpacity(this.plugin.config().fillOpacity)
             .clickTooltip(
                 this.plugin.config().claimTooltip
@@ -67,6 +68,10 @@ public final class SquaremapTask extends WrappedRunnable {
             );
 
         for (final FLocation claim : claims) {
+            if (!claim.getWorldName().equals(worldName)) { // cheaper to filter here than upstream
+                continue;
+            }
+
             final long chunkX = claim.getX();
             final long chunkZ = claim.getZ();
 

@@ -15,6 +15,8 @@ public final class FactionsConfig extends Config<FactionsConfig, WorldConfig> {
     public int strokeWeight = 1;
     public double strokeOpacity = 1.0D;
     public Color fillColor = Color.GREEN;
+    public Color warzoneStrokeColor = Color.RED;
+    public Color warzoneFillColor = Color.RED;
     public double fillOpacity = 0.2D;
     public String stringsPublic = "Public";
     public int zIndex = 99;
@@ -37,6 +39,8 @@ public final class FactionsConfig extends Config<FactionsConfig, WorldConfig> {
         this.claimTooltip = this.getString("settings.region.tooltip.regular-claim", this.claimTooltip);
         this.zIndex = this.getInt("settings.control.z-index", this.zIndex);
         this.layerPriority = this.getInt("settings.control.layer-priority", this.layerPriority);
+        this.warzoneFillColor = this.getColor("settings.style.warzone-fill-color", this.warzoneFillColor);
+        this.warzoneStrokeColor = this.getColor("settings.style.warzone-stroke-color", this.warzoneStrokeColor);
     }
 
     public FactionsConfig(Plugin plugin) {
