@@ -68,7 +68,7 @@ public final class SquaremapTask extends WrappedRunnable {
             );
 
         for (final FLocation claim : claims) {
-            if (!claim.getWorldName().equalsIgnoreCase(worldName)) { // cheaper to filter here than upstream
+            if (!worldName.equalsIgnoreCase(claim.getWorldName())) { // cheaper to filter here than upstream
                 continue;
             }
 

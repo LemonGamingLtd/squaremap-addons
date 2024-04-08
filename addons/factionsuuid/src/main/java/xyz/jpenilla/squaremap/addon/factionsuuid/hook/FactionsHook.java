@@ -23,10 +23,9 @@ public final class FactionsHook {
 
         final Multimap<Faction, FLocation> claims = HashMultimap.create(factionsAmount, (factionClaimsAmount / factionsAmount));
         for (final Faction faction : Factions.getInstance().getAllFactions()) {
-            if (!faction.isNormal() || !faction.isWarZone()) {
+            if (!faction.isNormal() && !faction.isWarZone()) {
                 continue;
             }
-
             claims.putAll(faction, Board.getInstance().getAllClaims(faction));
         }
 
