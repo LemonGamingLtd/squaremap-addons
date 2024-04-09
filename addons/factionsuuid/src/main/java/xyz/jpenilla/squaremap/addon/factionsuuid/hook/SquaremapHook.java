@@ -38,5 +38,9 @@ public final class SquaremapHook {
     public void disable() {
         this.tasks.values().forEach(SquaremapTask::disable);
         this.tasks.clear();
+
+        for (final MapWorld world : SquaremapProvider.get().mapWorlds()) {
+            world.layerRegistry().unregister(FACTIONS_LAYER_KEY);
+        }
     }
 }
