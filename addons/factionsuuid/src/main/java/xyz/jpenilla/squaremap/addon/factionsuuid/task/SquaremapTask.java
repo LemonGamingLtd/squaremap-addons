@@ -68,7 +68,7 @@ public final class SquaremapTask extends WrappedRunnable {
             );
 
         for (final FLocation claim : claims) {
-            if (!claim.getWorldName().equals(worldName)) { // cheaper to filter here than upstream
+            if (!claim.getWorld().getUID().equals(bukkitWorld.getUID())) { // cheaper to filter here than upstream
                 continue;
             }
 
