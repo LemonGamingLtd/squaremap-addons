@@ -7,12 +7,15 @@ import com.massivecraft.factions.FLocation;
 import com.massivecraft.factions.Faction;
 import com.massivecraft.factions.Factions;
 import com.massivecraft.factions.data.MemoryBoard;
+import org.bukkit.World;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class FactionsHook {
 
-    public static Multimap<Faction, FLocation> getClaims() {
+    public static Multimap<Faction, FLocation> getClaims(@NotNull World world) {
         final List<Faction> factions = Factions.getInstance().getAllFactions();
 
         final int factionsAmount = factions.size();
@@ -23,7 +26,13 @@ public final class FactionsHook {
             if (!faction.isNormal() && !faction.isWarZone()) {
                 continue;
             }
-            claims.putAll(faction, Board.getInstance().getAllClaims(faction));
+
+            claims.putAll(
+                faction,
+                Board.getInstance().getAllClaims(faction).stream()
+                    .filter(fLocation -> fLocation.getWorld().equals(world))
+                    .collect(Collectors.toSet())
+            );
         }
 
         return claims;

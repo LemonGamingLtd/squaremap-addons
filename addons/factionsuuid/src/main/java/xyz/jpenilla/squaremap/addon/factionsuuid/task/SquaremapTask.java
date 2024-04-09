@@ -45,7 +45,7 @@ public final class SquaremapTask extends WrappedRunnable {
 
     void updateClaims() {
         this.provider.clearMarkers(); // TODO track markers instead of clearing them
-        FactionsHook.getClaims().asMap().forEach(this::handleClaim);
+        FactionsHook.getClaims(bukkitWorld).asMap().forEach(this::handleClaim);
     }
 
     private void handleClaim(Faction faction, Collection<FLocation> claims) {
@@ -68,10 +68,6 @@ public final class SquaremapTask extends WrappedRunnable {
             );
 
         for (final FLocation claim : claims) {
-            if (!claim.getWorld().getUID().equals(bukkitWorld.getUID())) { // cheaper to filter here than upstream
-                continue;
-            }
-
             final long chunkX = claim.getX();
             final long chunkZ = claim.getZ();
 
