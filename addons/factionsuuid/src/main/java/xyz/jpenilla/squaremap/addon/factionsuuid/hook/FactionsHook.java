@@ -7,11 +7,8 @@ import com.massivecraft.factions.FLocation;
 import com.massivecraft.factions.Faction;
 import com.massivecraft.factions.Factions;
 import com.massivecraft.factions.data.MemoryBoard;
-import org.bukkit.World;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Objects;
 
 public final class FactionsHook {
 
