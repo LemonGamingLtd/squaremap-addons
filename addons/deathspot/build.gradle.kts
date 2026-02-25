@@ -1,6 +1,6 @@
 description = "DeathSpots addon for squaremap"
 
-bukkit {
+bukkitPluginYaml {
     main = "xyz.jpenilla.squaremap.addon.deathspot.DeathSpots"
-    addAuthor("BillyGalbreath")
+    authors.add("BillyGalbreath")
 }

@@ -1,8 +1,11 @@
 package xyz.jpenilla.squaremap.addon.claimchunk.task;
 
+import com.cjburkey.claimchunk.ClaimChunk;
 import com.cjburkey.claimchunk.chunk.DataChunk;
+import com.cjburkey.claimchunk.player.PlayerHandler;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +63,7 @@ public final class SquaremapTask extends WrappedRunnable {
             return;
         }
         final List<DataChunk> dataChunks = Arrays.stream(dataChunksArr)
-            .filter(claim -> claim.chunk.getWorld().equals(this.bukkitWorld.getName()))
+            .filter(claim -> claim.chunk.world().equals(this.bukkitWorld.getName()))
             .toList();
 
         // show simple markers (marker per chunk)
@@ -72,8 +75,8 @@ public final class SquaremapTask extends WrappedRunnable {
         // show combined chunks into polygons
         final List<Claim> claims = dataChunks.stream()
             .map(dataChunk -> new Claim(
-                dataChunk.chunk.getX(),
-                dataChunk.chunk.getZ(),
+                dataChunk.chunk.x(),
+                dataChunk.chunk.z(),
                 dataChunk.player
             ))
             .toList();
@@ -88,9 +91,7 @@ public final class SquaremapTask extends WrappedRunnable {
         // break groups down by owner
         Map<UUID, List<Claim>> byOwner = new HashMap<>();
         for (Claim claim : claims) {
-            List<Claim> list = byOwner.getOrDefault(claim.owner(), new ArrayList<>());
-            list.add(claim);
-            byOwner.put(claim.owner(), list);
+            byOwner.computeIfAbsent(claim.owner(), $ -> new ArrayList<>()).add(claim);
         }
 
         // combine touching claims
@@ -98,6 +99,7 @@ public final class SquaremapTask extends WrappedRunnable {
         for (Map.Entry<UUID, List<Claim>> entry : byOwner.entrySet()) {
             UUID owner = entry.getKey();
             List<Claim> list = entry.getValue();
+            list.sort(Comparator.comparing(Claim::x).thenComparing(Claim::z));
             next1:
             for (Claim claim : list) {
                 List<Group> groupList = groups.getOrDefault(owner, new ArrayList<>());
@@ -140,10 +142,10 @@ public final class SquaremapTask extends WrappedRunnable {
     }
 
     private void drawChunk(DataChunk claim) {
-        int minX = claim.chunk.getX() << 4;
-        int maxX = (claim.chunk.getX() + 1) << 4;
-        int minZ = claim.chunk.getZ() << 4;
-        int maxZ = (claim.chunk.getZ() + 1) << 4;
+        int minX = claim.chunk.x() << 4;
+        int maxX = (claim.chunk.x() + 1) << 4;
+        int minZ = claim.chunk.z() << 4;
+        int maxZ = (claim.chunk.z() + 1) << 4;
 
         final Rectangle rect = Marker.rectangle(Point.of(minX, minZ), Point.of(maxX, maxZ));
         final MarkerOptions.Builder options = options(claim.player);
@@ -154,8 +156,16 @@ public final class SquaremapTask extends WrappedRunnable {
     }
 
     private MarkerOptions.Builder options(UUID owner) {
-        final OfflinePlayer player = Bukkit.getOfflinePlayer(owner);
-        final String ownerName = player.getName() == null ? "unknown" : player.getName();
+        final PlayerHandler playerHandler = ClaimChunk.getInstance().getPlayerHandler();
+        String playerName = playerHandler.getUsername(owner);
+        if (playerName == null) {
+            final OfflinePlayer player = Bukkit.getOfflinePlayer(owner);
+            playerName = player.getName() == null ? "unknown" : player.getName();
+        }
+        String chunkName = playerHandler.getChunkName(owner);
+        if (chunkName == null) {
+            chunkName = playerName;
+        }
         return MarkerOptions.builder()
             .strokeColor(this.plugin.config().strokeColor)
             .strokeWeight(this.plugin.config().strokeWeight)
@@ -165,7 +175,8 @@ public final class SquaremapTask extends WrappedRunnable {
             .clickTooltip(
                 this.plugin.config().claimTooltip
                     .replace("{world}", this.bukkitWorld.getName())
-                    .replace("{owner}", ownerName)
+                    .replace("{owner}", playerName)
+                    .replace("{name}", chunkName)
             );
     }
 

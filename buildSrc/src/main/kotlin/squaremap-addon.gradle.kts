@@ -1,7 +1,7 @@
 plugins {
     id("base-conventions")
-    id("net.minecrell.plugin-yml.bukkit")
-    id("com.github.johnrengelman.shadow")
+    id("xyz.jpenilla.resource-factory-bukkit-convention")
+    id("com.gradleup.shadow")
 }
 
 dependencies {
@@ -33,6 +33,7 @@ tasks {
         )
         reloc("io.leangen.geantyref")
         reloc("org.spongepowered.configurate")
+        reloc("net.kyori.option")
         reloc("org.yaml.snakeyaml")
     }
 
@@ -41,9 +42,9 @@ tasks {
     }
 }
 
-bukkit {
+bukkitPluginYaml {
     apiVersion = "1.18"
-    addDepend("squaremap")
-    addAuthor("jmp")
+    depend.add("squaremap")
+    authors.add("jmp")
     foliaSupported = true
 }

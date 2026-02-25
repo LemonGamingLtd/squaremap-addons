@@ -1,12 +1,12 @@
 description = "Integration with various vanish plugins for squaremap"
 
 dependencies {
-    compileOnly("com.github.LeonMangler:SuperVanish:6.2.17") {
+    compileOnly("com.github.LeonMangler:SuperVanish:6.2.19") {
         isTransitive = false
     }
 }
 
-bukkit {
+bukkitPluginYaml {
     main = "xyz.jpenilla.squaremap.addon.vanish.SquaremapVanish"
     softDepend = listOf("SuperVanish", "PremiumVanish")
 }

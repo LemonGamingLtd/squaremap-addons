@@ -1,7 +1,7 @@
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
-        maven("https://papermc.io/repo/repository/maven-public/")
+        maven("https://repo.papermc.io/repository/maven-public/")
         maven("https://s01.oss.sonatype.org/content/repositories/snapshots/") {
             mavenContent {
                 snapshotsOnly()
@@ -24,6 +24,11 @@ dependencyResolutionManagement {
                 includeGroupByRegex("com\\.github\\..*")
             }
         }
+        modrinthMavenWorkaround(
+            "claimchunk",
+            "0.0.25-FIX3",
+            "claimchunk-0.0.25-FIX3-plugin.jar"
+        )
         maven("https://nexuslite.gcnt.net/repos/other/")
         maven("https://ci.ender.zone/plugin/repository/everything/")
     }
@@ -31,7 +36,7 @@ dependencyResolutionManagement {
 }
 
 plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
 rootProject.name = "squaremap-addons"
@@ -55,5 +60,17 @@ fun includeAddon(addonName: String) {
     include(name)
     project(":$name").apply {
         projectDir = file("addons/$addonName")
+    }
+}
+
+// https://github.com/modrinth/code/issues/2428
+fun RepositoryHandler.modrinthMavenWorkaround(nameOrId: String, version: String, fileName: String) {
+    val url = "https://api.modrinth.com/maven/maven/modrinth/$nameOrId/$version/$fileName"
+    val group = "maven.modrinth.workaround"
+    ivy(url.substringBeforeLast('/')) {
+        name = "Modrinth Maven Workaround for $nameOrId"
+        patternLayout { artifact(url.substringAfterLast('/')) }
+        metadataSources { artifact() }
+        content { includeModule(group, nameOrId) }
     }
 }
