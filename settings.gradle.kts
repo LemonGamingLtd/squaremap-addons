@@ -29,8 +29,8 @@ dependencyResolutionManagement {
             "0.0.25-FIX3",
             "claimchunk-0.0.25-FIX3-plugin.jar"
         )
-        maven("https://nexuslite.gcnt.net/repos/other/")
         maven("https://ci.ender.zone/plugin/repository/everything/")
+        maven("https://nexuslite.gcnt.net/repos/other/")
     }
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
 }
