@@ -54,6 +54,7 @@ includeAddon("claimchunk")
 includeAddon("banners")
 includeAddon("vanish")
 includeAddon("factionsuuid")
+includeAddon("coreprotect")
 
 fun includeAddon(addonName: String) {
     val name = "squaremap-$addonName"
