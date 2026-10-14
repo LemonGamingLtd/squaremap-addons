@@ -13,6 +13,9 @@ import java.lang.invoke.MethodType;
  * Queues a chunk for squaremap's background render.
  */
 public final class SquaremapChunkMarker {
+    private static final String MAP_WORLD_INTERNAL_LEGACY = "xyz.jpenilla.squaremap.common.data.MapWorldInternal";
+    private static final String CHUNK_COORDINATE_LEGACY = "xyz.jpenilla.squaremap.common.data.ChunkCoordinate";
+
     private static final String MAP_WORLD_INTERNAL = "xyz.jpenilla.squaremap.common.world.MapWorldInternal";
     private static final String CHUNK_COORDINATE = "xyz.jpenilla.squaremap.common.coordinate.ChunkCoordinate";
 
@@ -22,10 +25,24 @@ public final class SquaremapChunkMarker {
     private final MethodHandle chunkModified;
 
     public SquaremapChunkMarker(final Squaremap squaremap) throws ReflectiveOperationException {
+        Class<?> mapWorldInternalClassDef;
         this.squaremap = squaremap;
+
         final ClassLoader loader = squaremap.getClass().getClassLoader();
-        this.mapWorldInternalClass = Class.forName(MAP_WORLD_INTERNAL, true, loader);
-        final Class<?> chunkCoordinateClass = Class.forName(CHUNK_COORDINATE, true, loader);
+        try {
+            mapWorldInternalClassDef = Class.forName(MAP_WORLD_INTERNAL, true, loader);
+        } catch (final ClassNotFoundException ex) {
+            mapWorldInternalClassDef = Class.forName(MAP_WORLD_INTERNAL_LEGACY, true, loader);
+        }
+        this.mapWorldInternalClass = mapWorldInternalClassDef;
+
+        Class<?> chunkCoordinateClass;
+        try {
+            chunkCoordinateClass = Class.forName(CHUNK_COORDINATE, true, loader);
+        } catch (final ClassNotFoundException ex) {
+            chunkCoordinateClass = Class.forName(CHUNK_COORDINATE_LEGACY, true, loader);
+        }
+
         final MethodHandles.Lookup lookup = MethodHandles.publicLookup();
         this.newChunkCoordinate = lookup.findConstructor(chunkCoordinateClass, MethodType.methodType(void.class, int.class, int.class));
         this.chunkModified = lookup.findVirtual(this.mapWorldInternalClass, "chunkModified", MethodType.methodType(void.class, chunkCoordinateClass));
