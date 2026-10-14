@@ -1,19 +1,20 @@
 package xyz.jpenilla.squaremap.addon.coreprotect.hook;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import org.bukkit.World;
 import xyz.jpenilla.squaremap.api.BukkitAdapter;
 import xyz.jpenilla.squaremap.api.MapWorld;
 import xyz.jpenilla.squaremap.api.Squaremap;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+
 /**
  * Queues a chunk for squaremap's background render.
  */
 public final class SquaremapChunkMarker {
-    private static final String MAP_WORLD_INTERNAL = "xyz.jpenilla.squaremap.common.data.MapWorldInternal";
-    private static final String CHUNK_COORDINATE = "xyz.jpenilla.squaremap.common.data.ChunkCoordinate";
+    private static final String MAP_WORLD_INTERNAL = "xyz.jpenilla.squaremap.common.world.MapWorldInternal";
+    private static final String CHUNK_COORDINATE = "xyz.jpenilla.squaremap.common.coordinate.ChunkCoordinate";
 
     private final Squaremap squaremap;
     private final Class<?> mapWorldInternalClass;
