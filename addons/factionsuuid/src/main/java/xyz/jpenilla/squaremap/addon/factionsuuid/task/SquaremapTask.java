@@ -30,9 +30,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public final class SquaremapTask extends WrappedRunnable {
+    // system factions keep legacy colour codes in their tags, e.g. "§4Warzone"
+    private static final Pattern COLOR_CODE = Pattern.compile("(?i)\u00a7[0-9a-fk-orx]");
+
     private final MapWorld world;
     private final World bukkitWorld;
     private final SimpleLayerProvider provider;
@@ -83,7 +87,7 @@ public final class SquaremapTask extends WrappedRunnable {
         if (faction.isNormal()) {
             searchData.add(new FactionSearch.FactionClaims(
                 faction.getId(),
-                faction.getTag(),
+                stripColor(faction.getTag()),
                 hex(color != null ? color : config.fillColor),
                 normalClaims.stream().map(claim -> new int[]{(int) claim.getX(), (int) claim.getZ()}).toList(),
                 raidClaims.entrySet().stream().map(e -> new long[]{e.getKey().getX(), e.getKey().getZ(), e.getValue()}).toList()
@@ -98,7 +102,7 @@ public final class SquaremapTask extends WrappedRunnable {
         final FactionsConfig config = this.plugin.config();
         final String worldName = bukkitWorld.getName();
         final boolean raid = raidExpiry != null;
-        final String tag = escape(faction.getTag());
+        final String tag = escape(stripColor(faction.getTag()));
 
         final MarkerOptions.Builder options = MarkerOptions.builder()
             .strokeColor(faction.isWarZone() ? config.warzoneStrokeColor : raid ? config.raidClaimStrokeColor : color != null ? color : config.strokeColor)
@@ -115,7 +119,7 @@ public final class SquaremapTask extends WrappedRunnable {
                     .replace("{world}", worldName)
                     .replace("{id}", faction.getId())
                     .replace("{tag}", tag)
-                    .replace("{desc}", escape(faction.getDescription()))
+                    .replace("{desc}", escape(stripColor(faction.getDescription())))
                     .replace("{members}", faction.getFPlayers().stream().map(FPlayer::getName).map(SquaremapTask::escape).collect(Collectors.joining(", ")))
                     .replace("{created}", Date.from(Instant.ofEpochMilli(faction.getFoundedDate())).toString())
             );
@@ -171,6 +175,10 @@ public final class SquaremapTask extends WrappedRunnable {
 
     private static String hex(Color color) {
         return "#%06x".formatted(color.getRGB() & 0xFFFFFF);
+    }
+
+    private static String stripColor(String text) {
+        return COLOR_CODE.matcher(text).replaceAll("");
     }
 
     // tags, descriptions and names are player-chosen and end up in the map page as HTML
