@@ -7,6 +7,8 @@ import org.bukkit.World;
 import xyz.jpenilla.squaremap.addon.common.scheduler.WrappedRunnable;
 import xyz.jpenilla.squaremap.addon.factionsuuid.SquaremapFactions;
 import xyz.jpenilla.squaremap.addon.factionsuuid.hook.FactionsHook;
+import xyz.jpenilla.squaremap.addon.factionsuuid.util.ChunkPolygonMerge;
+import xyz.jpenilla.squaremap.addon.factionsuuid.util.ContiguousChunks;
 import xyz.jpenilla.squaremap.api.BukkitAdapter;
 import xyz.jpenilla.squaremap.api.Key;
 import xyz.jpenilla.squaremap.api.MapWorld;
@@ -14,11 +16,15 @@ import xyz.jpenilla.squaremap.api.Point;
 import xyz.jpenilla.squaremap.api.SimpleLayerProvider;
 import xyz.jpenilla.squaremap.api.marker.Marker;
 import xyz.jpenilla.squaremap.api.marker.MarkerOptions;
+import xyz.jpenilla.squaremap.api.marker.Polygon;
 import xyz.jpenilla.squaremap.api.marker.Rectangle;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public final class SquaremapTask extends WrappedRunnable {
@@ -67,21 +73,36 @@ public final class SquaremapTask extends WrappedRunnable {
                     .replace("{created}", Date.from(Instant.ofEpochMilli(faction.getFoundedDate())).toString())
             );
 
-        for (final FLocation claim : claims) {
-            final long chunkX = claim.getX();
-            final long chunkZ = claim.getZ();
+        if (this.plugin.config().showChunks) {
+            for (final FLocation claim : claims) {
+                final long chunkX = claim.getX();
+                final long chunkZ = claim.getZ();
 
-            final long minX = (chunkX << 4);
-            final long maxX = (chunkX << 4) | 15;
+                final long minX = (chunkX << 4);
+                final long maxX = (chunkX << 4) | 15;
 
-            final long minZ = (chunkZ << 4);
-            final long maxZ = (chunkZ << 4) | 15;
+                final long minZ = (chunkZ << 4);
+                final long maxZ = (chunkZ << 4) | 15;
 
-            final Rectangle rectangle = Marker.rectangle(Point.of(minX, minZ), Point.of(maxX + 1, maxZ + 1));
-            rectangle.markerOptions(options);
+                final Rectangle rectangle = Marker.rectangle(Point.of(minX, minZ), Point.of(maxX + 1, maxZ + 1));
+                rectangle.markerOptions(options);
 
-            final String markerId = "factions_claim_%s_%d_%d".formatted(faction.getId(), chunkX, chunkZ);
-            this.provider.addMarker(Key.of(markerId), rectangle);
+                final String markerId = "factions_claim_%s_%d_%d".formatted(faction.getId(), chunkX, chunkZ);
+                this.provider.addMarker(Key.of(markerId), rectangle);
+            }
+            return;
+        }
+
+        final AtomicInteger groupIndex = new AtomicInteger();
+        for (final List<FLocation> group : ContiguousChunks.group(claims)) {
+            final List<int[]> coords = new ArrayList<>(group.size());
+            for (final FLocation claim : group) {
+                coords.add(new int[]{(int) claim.getX(), (int) claim.getZ()});
+            }
+            final Polygon polygon = ChunkPolygonMerge.toPolygon(coords);
+            polygon.markerOptions(options);
+            final String markerId = "factions_claim_%s_g%d".formatted(faction.getId(), groupIndex.getAndIncrement());
+            this.provider.addMarker(Key.of(markerId), polygon);
         }
     }
 

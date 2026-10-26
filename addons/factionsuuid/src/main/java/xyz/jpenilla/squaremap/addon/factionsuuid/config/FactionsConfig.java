@@ -21,6 +21,11 @@ public final class FactionsConfig extends Config<FactionsConfig, WorldConfig> {
     public String stringsPublic = "Public";
     public int zIndex = 99;
     public int layerPriority = 99;
+    /**
+     * When true, draws one rectangle per chunk (shows internal grid lines between adjacent claims).
+     * When false, merges each contiguous group of chunks into a single polygon (outline only on the outside).
+     */
+    public boolean showChunks = false;
     public String claimTooltip = "Id: <span style=\"font-weight:bold;\">{id}</span><br/>" +
         "Claim Owners: <span style=\"font-weight:bold;\">{owners}</span><br/>" +
         "Members: <span style=\"font-weight:bold;\">{managers}</span><br/>" +
@@ -41,6 +46,7 @@ public final class FactionsConfig extends Config<FactionsConfig, WorldConfig> {
         this.layerPriority = this.getInt("settings.control.layer-priority", this.layerPriority);
         this.warzoneFillColor = this.getColor("settings.style.warzone-fill-color", this.warzoneFillColor);
         this.warzoneStrokeColor = this.getColor("settings.style.warzone-stroke-color", this.warzoneStrokeColor);
+        this.showChunks = this.getBoolean("settings.claim.show-chunks", this.showChunks);
     }
 
     public FactionsConfig(Plugin plugin) {
