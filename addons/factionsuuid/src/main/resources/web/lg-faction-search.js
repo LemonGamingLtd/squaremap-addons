@@ -111,6 +111,99 @@
         return new URL(server.squaremap.replace(/\/?$/, "/"), location.href).pathname === new URL(BASE).pathname;
     }
 
+    // LiveAtlas reads a world's squaremap markers once and never again (its squaremap updateMarkers() is empty),
+    // so claims only changed on a reload. Re-read them and push whatever changed through LiveAtlas's own
+    // incremental marker updates, which reshape the existing layers in place.
+    let markerProvider = null; // the provider whose marker loader is wrapped
+    let drawnMarkers = null; // {world, sets: Map(set -> Map(id -> json))}, what LiveAtlas has on the map
+    let lastMarkerCheck = 0;
+    let checkingMarkers = false;
+
+    const markerJson = (markers) =>
+        new Map([...markers].map(([set, list]) => [set, new Map([...list].map(([id, marker]) => [id, JSON.stringify(marker)]))]));
+
+    function keepMarkersFresh() {
+        const store = liveAtlasStore();
+        const provider = store && store.state.currentMapProvider;
+        if (!provider || typeof provider.getMarkerSets !== "function") {
+            return;
+        }
+        const load = Object.getPrototypeOf(provider).getMarkerSets;
+        if (provider !== markerProvider) {
+            // a new server brings a new provider; note what each world load draws from now on
+            markerProvider = provider;
+            drawnMarkers = null;
+            provider.getMarkerSets = async function (world) {
+                await load.call(this, world);
+                drawnMarkers = { world: world.name, sets: markerJson(this.markers) };
+            };
+        }
+        if (checkingMarkers || document.visibilityState !== "visible" || Date.now() - lastMarkerCheck < REFRESH_MS) {
+            return;
+        }
+        // updating a marker closes its popup, and raid claim countdowns change every minute; wait until it's closed
+        if (map._popup && map._popup.isOpen()) {
+            return;
+        }
+        lastMarkerCheck = Date.now();
+        checkingMarkers = true;
+        checkMarkers(store, provider, load).finally(() => (checkingMarkers = false));
+    }
+
+    async function checkMarkers(store, provider, load) {
+        const world = store.state.currentWorld;
+        if (!world) {
+            return;
+        }
+        // load into a throwaway copy so this can't abort or mix with a load LiveAtlas starts itself
+        const copy = Object.create(provider);
+        copy.markerSets = new Map();
+        copy.markers = new Map();
+        copy.markersAbort = null;
+        try {
+            await load.call(copy, world);
+        } catch (e) {
+            return;
+        }
+        if (store.state.currentWorld !== world || store.state.currentMapProvider !== provider) {
+            return;
+        }
+        const next = markerJson(copy.markers);
+        if (!drawnMarkers || drawnMarkers.world !== world.name) {
+            // the world loaded before this script hooked in; take this as what's drawn
+            drawnMarkers = { world: world.name, sets: next };
+            return;
+        }
+        const updates = [];
+        for (const [set, drawn] of drawnMarkers.sets) {
+            const now = next.get(set);
+            // a layer appearing or disappearing needs a reload; LiveAtlas ids are positions in the list, so compare by id
+            if (!now || !store.state.markerSets.has(set)) {
+                next.set(set, drawn);
+                continue;
+            }
+            for (const [id, json] of now) {
+                if (drawn.get(id) !== json) {
+                    updates.push({ set, id, removed: false, payload: copy.markers.get(set).get(id) });
+                }
+            }
+            for (const id of drawn.keys()) {
+                if (!now.has(id)) {
+                    updates.push({ set, id, removed: true });
+                }
+            }
+        }
+        for (const set of [...next.keys()]) {
+            if (!drawnMarkers.sets.has(set)) {
+                next.delete(set);
+            }
+        }
+        drawnMarkers = { world: world.name, sets: next };
+        if (updates.length) {
+            store.commit("addMarkerUpdates", updates);
+        }
+    }
+
     const fetchJson = (url) =>
         fetch(url, { cache: "no-store" })
             .then((r) => (r.ok ? r.json() : null))
@@ -161,7 +254,12 @@
                     shapes = [];
                     render();
                 }
-            } else if (selected && currentWorld() !== shownWorld) {
+                return;
+            }
+            if (LIVE_ATLAS) {
+                keepMarkersFresh();
+            }
+            if (selected && currentWorld() !== shownWorld) {
                 draw(false);
             }
         }, 1000);
