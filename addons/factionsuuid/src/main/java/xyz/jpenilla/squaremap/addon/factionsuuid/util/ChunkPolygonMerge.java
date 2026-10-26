@@ -6,6 +6,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import xyz.jpenilla.squaremap.api.Point;
 import xyz.jpenilla.squaremap.api.marker.Marker;
@@ -63,24 +64,36 @@ public final class ChunkPolygonMerge {
     }
 
     private static Polygon toMarker(final Shape shape) {
-        final List<Point> main = new ArrayList<>();
-        final List<List<Point>> subtract = new ArrayList<>();
+        final List<List<Point>> rings = new ArrayList<>();
         final PathIterator iter = shape.getPathIterator(null, 0.0);
         final double[] coords = new double[6];
-        List<Point> current = main;
+        List<Point> current = new ArrayList<>();
+        rings.add(current);
         while (!iter.isDone()) {
             final int segment = iter.currentSegment(coords);
             switch (segment) {
                 case PathIterator.SEG_MOVETO, PathIterator.SEG_LINETO -> current.add(Point.of(coords[0], coords[1]));
                 case PathIterator.SEG_CLOSE -> {
-                    final List<Point> newList = new ArrayList<>();
-                    subtract.add(newList);
-                    current = newList;
+                    current = new ArrayList<>();
+                    rings.add(current);
                 }
             }
             iter.next();
         }
-        subtract.removeIf(List::isEmpty);
-        return Marker.polygon(main, subtract);
+        rings.removeIf(List::isEmpty);
+        // a ring of claims around unclaimed land comes out as an outline plus holes, and Area doesn't promise the outline comes first
+        final List<Point> main = rings.stream().max(Comparator.comparingDouble(ChunkPolygonMerge::area)).orElseThrow();
+        rings.remove(main);
+        return Marker.polygon(main, rings);
+    }
+
+    private static double area(final List<Point> ring) {
+        double sum = 0;
+        for (int i = 0; i < ring.size(); i++) {
+            final Point a = ring.get(i);
+            final Point b = ring.get((i + 1) % ring.size());
+            sum += a.x() * b.z() - b.x() * a.z();
+        }
+        return Math.abs(sum) / 2;
     }
 }
